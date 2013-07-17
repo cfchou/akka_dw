@@ -17,10 +17,13 @@ class Plane extends Actor with ActorLogging {
   import Plane._
 
   // child of this actor
-  val altimeter = context.actorOf(Props[Altimeter], "Altimeter")
+  //val altimeter = context.actorOf(Props[Altimeter], "Altimeter")
+
+  // Props: def apply(creator: => Actor): Props
+  val altimeter = context.actorOf(Props(Altimeter()), "Altimeter")
 
   /*
-  Props: def apply(creator: ⇒ Actor): Props
+  Props: def apply(creator: => Actor): Props
   Returns a Props that has default values except for "creator" which will be a
   function that creates an instance using the supplied thunk
    */

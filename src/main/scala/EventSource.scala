@@ -11,7 +11,12 @@ object EventSource {
   case class UnregitsterListener(listener: ActorRef)
 }
 
-trait EventSource { this: Actor =>
+trait EventSource {  this: Actor =>
+  def evenSourceReceive: Actor.Receive
+  def sendEvent[T](event: T): Unit
+}
+
+trait ProductionEventSource extends EventSource { this: Actor =>
   import EventSource._
 
   var listeners = Vector.empty[ActorRef]
@@ -19,9 +24,9 @@ trait EventSource { this: Actor =>
   val evenSourceReceive: Actor.Receive = {
     case RegitsterListener(listener) =>
       listeners = if (listeners.contains(listener)) listeners
-                  else listeners :+ listener
+      else listeners :+ listener
     case UnregitsterListener(listener) =>
-      listeners.filter(_ != listener)
+      listeners = listeners.filter(_ != listener)
   }
 
   def sendEvent[T](event: T): Unit = {
