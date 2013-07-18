@@ -3,7 +3,7 @@
  * User: cfchou
  * Date: 14/07/2013
  */
-package dwTest
+package zzz.akka.test
 import akka.actor.{Actor, Props, ActorRef, ActorSystem}
 import akka.testkit.{ImplicitSender, TestKit}
 import org.scalatest.{ParallelTestExecution, BeforeAndAfterAll, WordSpec, fixture}
@@ -24,7 +24,7 @@ class MyActor extends Actor {
   }
 }
 
-import dwTest.MyActor.{Pong, Ping}
+import MyActor.{Pong, Ping}
 
 class TestKitSpec(actorSystem: ActorSystem)
   extends TestKit(actorSystem)

@@ -3,7 +3,7 @@
  * Date: 16/07/13
  * Time: 10:46
  */
-package dwMain
+package zzz.akka.avionics
 import akka.actor.{Actor, ActorRef}
 
 object EventSource {

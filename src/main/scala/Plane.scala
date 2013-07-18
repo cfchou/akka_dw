@@ -3,10 +3,10 @@
  * Date: 15/07/13
  * Time: 16:48
  */
-package dwMain
+package zzz.akka.avionics
 
 import akka.actor.{Props, Actor, ActorLogging}
-import dwMain.EventSource.RegitsterListener
+import EventSource.RegitsterListener
 
 object Plane {
   case object GiveMeControl

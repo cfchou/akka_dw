@@ -3,7 +3,7 @@
  * Date: 15/07/13
  * Time: 16:43
  */
-package dwMain
+package zzz.akka.avionics
 
 import akka.actor.{Actor, ActorRef}
 

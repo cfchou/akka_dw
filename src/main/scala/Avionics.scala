@@ -3,10 +3,10 @@
  * Date: 15/07/13
  * Time: 17:43
  */
-package dwMain
+package zzz.akka.avionics
 
 import akka.util.Timeout
-import dwMain.Plane.GiveMeControl
+import Plane.GiveMeControl
 import scala.concurrent.duration._
 import akka.actor.{ActorRef, Props, ActorSystem}
 import scala.concurrent.{ExecutionContext, Await}

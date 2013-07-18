@@ -3,12 +3,11 @@
  * Date: 16/07/13
  * Time: 15:58
  */
-package dwTest
+package zzz.akka.avionics
 
 import akka.testkit.{TestActorRef, TestLatch, TestKit}
 import akka.actor.{Props, Actor, ActorSystem}
-import dwMain.Altimeter.{AltitudeUpdate, RateChanging}
-import dwMain.{Altimeter, EventSource}
+import Altimeter.{AltitudeUpdate, RateChanging}
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 import org.scalatest.matchers.ShouldMatchers
 import scala.concurrent.Await

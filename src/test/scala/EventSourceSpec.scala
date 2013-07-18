@@ -3,10 +3,9 @@
  * Date: 16/07/13
  * Time: 14:21
  */
-package dwTest
+package zzz.akka.avionics
 
-import dwMain.EventSource.{UnregitsterListener, RegitsterListener}
-import dwMain.{ProductionEventSource}
+import EventSource.{UnregitsterListener, RegitsterListener}
 import akka.actor.{ActorSystem, Actor}
 import akka.testkit.{TestActorRef, TestKit, ImplicitSender}
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
