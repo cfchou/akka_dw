@@ -6,7 +6,7 @@
 package zzz.akka.avionics
 
 import akka.util.Timeout
-import Plane.GiveMeControl
+import zzz.akka.avionics.Plane._
 import scala.concurrent.duration._
 import akka.actor.{ActorRef, Props, ActorSystem}
 import scala.concurrent.{ExecutionContext, Await}
@@ -25,7 +25,7 @@ object Avionics {
     Await: def result[T](awaitable: Awaitable[T], atMost: Duration): T
 
      */
-    val control = Await.result((plane ? GiveMeControl).mapTo[ActorRef], 5.seconds)
+    val control = Await.result((plane ? GiveMeControl).mapTo[Controls], 5.seconds).controls
     system.scheduler.scheduleOnce(200.millis) {
       control ! ControlSurfaces.StickBack(1f)
     }

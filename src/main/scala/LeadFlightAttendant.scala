@@ -11,7 +11,7 @@ object LeadFlightAttendant {
   case object GetFlightAttendant
   case class Attendant(a: ActorRef)
   def apply() = new LeadFlightAttendant with AttendantCreationPolicy {
-    override val numberOfAttendants: Int = 10
+    override val numberOfAttendants: Int = 8
   }
 }
 
