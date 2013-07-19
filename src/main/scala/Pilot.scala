@@ -13,47 +13,57 @@ object Pilots {
   case object RelinquishControl
 }
 
+trait PilotProvider {
+  def newPilot(plane: ActorRef, autopilot: ActorRef, controls: ActorRef,
+               altimeter: ActorRef): Actor = {
+    new Pilot(plane, autopilot, controls, altimeter)
+  }
 
-class Pilot extends Actor {
+  def newCopilot(plane: ActorRef, autopilot: ActorRef,
+                 altimeter: ActorRef): Actor = {
+    new Copilot(plane, autopilot, altimeter)
+  }
+
+  def newAutopilot: Actor = new Autopilot
+}
+
+class Pilot(plane: ActorRef, autopilot: ActorRef,
+            var controls: ActorRef, // mutable, might give away controls
+            altimeter: ActorRef)
+  extends Actor {
   import Pilots._
   import Plane._
 
-  var controls: ActorRef = context.system.deadLetters
+  //var controls: ActorRef = context.system.deadLetters
   var copilot: ActorRef = context.system.deadLetters
-  var autopilot: ActorRef = context.system.deadLetters
+  //var autopilot: ActorRef = context.system.deadLetters
 
   val copilotName = context.system.settings.config.getString(
     "zzz.akka.avionics.flightcrew.copilotName")
 
   def receive: Actor.Receive = {
     case ReadyToGo =>
-      // Pilot's parent is Plane
-      context.parent ! GiveMeControl
-
       copilot = context.actorFor("../" + copilotName)
 
-      autopilot = context.actorFor("../Autopilot")
-
     case Controls(controlSurfaces) =>
+      // regain controls
       controls = controlSurfaces
   }
 }
 
-class Copilot extends Actor {
+class Copilot(plane: ActorRef, autopilot: ActorRef, altimeter: ActorRef)
+  extends Actor {
   import Pilots._
 
-  var controls: ActorRef = context.system.deadLetters
+  //var controls: ActorRef = context.system.deadLetters
   var pilot: ActorRef = context.system.deadLetters
-  var autopilot: ActorRef = context.system.deadLetters
 
   val pilotName = context.system.settings.config.getString(
     "zzz.akka.avionics.flightcrew.pilotName")
 
   def receive: Actor.Receive = {
     case ReadyToGo =>
-      // controls remain deadLetters
       pilot = context.actorFor("../" + pilotName)
-      autopilot = context.actorFor("../Autopilot")
   }
 }
 

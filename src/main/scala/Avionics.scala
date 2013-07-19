@@ -17,7 +17,8 @@ object Avionics {
   val system = ActorSystem("PlaneSimulation")
   // root of actor hierarchy must be ActorSystem
   // plane is its child
-  val plane = system.actorOf(Props[Plane], "Plane")
+  //val plane = system.actorOf(Props[Plane], "Plane")
+  val plane = system.actorOf(Props(Plane()), "Plane")
 
   import ExecutionContext.Implicits.global
   def main(args: Array[String]) {

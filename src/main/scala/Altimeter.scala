@@ -15,6 +15,10 @@ object Altimeter {
   def apply() = new Altimeter with ProductionEventSource
 }
 
+trait AltimeterProvider {
+  def newAltimeter: Altimeter = Altimeter()
+}
+
 class Altimeter extends Actor with ActorLogging {
   // Factory must new it with EventSource
   this: EventSource =>
@@ -35,7 +39,6 @@ class Altimeter extends Actor with ActorLogging {
     Tick)
 
   case object Tick
-
 
   def receive: Actor.Receive = evenSourceReceive orElse {
     case RateChanging(amount) =>

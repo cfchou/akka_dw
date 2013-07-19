@@ -15,6 +15,10 @@ object LeadFlightAttendant {
   }
 }
 
+trait LeadFlightAttendantProvider {
+  def newLeadFlightAttendant: Actor = LeadFlightAttendant()
+}
+
 class LeadFlightAttendant extends Actor {
   this: AttendantCreationPolicy =>
   import LeadFlightAttendant._
