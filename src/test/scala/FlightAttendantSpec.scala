@@ -18,9 +18,10 @@ object TestFlightAttendant {
   }
 }
 
+// minimum supported akka.scheduler.tick-duration on Windows is 10ms
 class FlightAttendantSpec
   extends TestKit(ActorSystem("FlightAttendantSpec",
-    ConfigFactory.parseString("akka.scheduler.tick-duration = 1ms")))
+    ConfigFactory.parseString("akka.scheduler.tick-duration = 10ms")))
   with ImplicitSender
   with WordSpec
   with ShouldMatchers {

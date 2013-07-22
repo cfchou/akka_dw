@@ -32,25 +32,25 @@ trait IsolatedLifeCycleSupervisor extends Actor {
   // Only create children when preStart(NOT doing it in preRestart).
   final override def preStart() = childStarter()
 
-  // Don't call preStart(), so no children is re-created.
-  final override def postRestart(reason: Throwable) { }
-
   // Don't stop children.
   override def preRestart(reason: Throwable, message: Option[Any]) { }
+
+  // Don't call preStart(), so no children is re-created.
+  final override def postRestart(reason: Throwable) { }
 }
 
 
 // no limit if maxNrRetries < 0
 // no window if withinTimeRange == Duration.Inf
 abstract class IsolatedResumeSupervisor(maxNrRetries: Int = -1,
-                                        withinTimeRange: Duration = Duration.Inf)
+  withinTimeRange: Duration = Duration.Inf)
   extends IsolatedLifeCycleSupervisor {
   this: SupervisionStrategyFactory =>
   override val supervisorStrategy: SupervisorStrategy =
     makeStrategy(maxNrRetries, withinTimeRange) {
       case _: ActorInitializationException => Stop
       case _: ActorKilledException => Stop
-      case _: Exception => Resume  // Other Exceptions cause it to Resume.
+      case _: Exception => Resume  // Exceptions have no effect on its children.
       case _ => Escalate
     }
 }

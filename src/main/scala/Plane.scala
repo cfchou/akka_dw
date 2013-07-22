@@ -16,6 +16,9 @@ object Plane {
   case object GiveMeControl
   case class Controls(val controls: ActorRef)
 
+  case object RequestCopilot
+  case class CopilotReference(val copilot: ActorRef)
+
   def apply(): Plane =
     new Plane with AltimeterProvider
       with PilotProvider
@@ -56,17 +59,20 @@ class Plane extends Actor with ActorLogging {
       sender ! Controls(actorForControls("ControlSurfaces"))
     case AltitudeUpdate(altitude) =>
       log info(s"Altitude is $altitude.")
+    case RequestCopilot =>
+      sender ! CopilotReference(actorForControls(copilotName))
   }
 
   implicit val askTimeout = Timeout(1.second)
 
   def startEquipment(): Unit = {
+    val plane = self
     val controls = context.actorOf(
       Props(new IsolatedResumeSupervisor with OneForOneStrategyFactory {
         // Create children.
         def childStarter() {
           val alt = context.actorOf(Props(newAltimeter), "Altimeter")
-          context.actorOf(Props(newAutopilot), "Autopilot")
+          context.actorOf(Props(newAutopilot(self)), "Autopilot")
           context.actorOf(Props(new ControlSurfaces(alt)), "ControlSurfaces")
         }
       }), "Equipment")
