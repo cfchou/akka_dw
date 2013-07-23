@@ -5,7 +5,7 @@
  */
 package zzz.akka.avionics
 
-import EventSource.{UnregitsterListener, RegitsterListener}
+import EventSource.{UnregisterListener, RegisterListener}
 import akka.actor.{ActorSystem, Actor}
 import akka.testkit.{TestActorRef, TestKit, ImplicitSender}
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
@@ -38,21 +38,21 @@ class EventSourceSpec
       //     system: ActorSystem): TestActorRef[T]
       //   def underlyingActor: T
       val es = TestActorRef[TestEventSource].underlyingActor
-      es.receive(RegitsterListener(testActor))  // TestKit.testActor: ActorRef
+      es.receive(RegisterListener(testActor))  // TestKit.testActor: ActorRef
       es.listeners should contain (testActor)
     }
 
     "allow to unregister a listener" in {
       val es = TestActorRef[TestEventSource].underlyingActor
-      es.receive(RegitsterListener(testActor))  // TestKit.testActor: ActorRef
-      es.receive(UnregitsterListener(testActor))  // TestKit.testActor: ActorRef
+      es.receive(RegisterListener(testActor))  // TestKit.testActor: ActorRef
+      es.receive(UnregisterListener(testActor))  // TestKit.testActor: ActorRef
       es.listeners.size should be (0)
 
     }
 
     "send the event to the test actor" in {
       val testA = TestActorRef[TestEventSource]
-      testA.receive(RegitsterListener(testActor))  // TestKit.testActor: ActorRef
+      testA.receive(RegisterListener(testActor))  // TestKit.testActor: ActorRef
       testA.underlyingActor.sendEvent("TTTTTTest")
       expectMsg("TTTTTTest") // need to import ImplicitSender
     }

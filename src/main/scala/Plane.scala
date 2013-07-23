@@ -19,6 +19,8 @@ object Plane {
   case object RequestCopilot
   case class CopilotReference(val copilot: ActorRef)
 
+  case object LostControl
+
   def apply(): Plane =
     new Plane with AltimeterProvider
       with PilotProvider
@@ -41,13 +43,13 @@ class Plane extends Actor with ActorLogging {
   val leadAttendantName = config.getString(s"$cfgstr.leadAttendantName")
 
   override def preStart() {
-    import EventSource.RegitsterListener
+    import EventSource.RegisterListener
     import Pilots.ReadyToGo
 
     startEquipment()
     startPeople() // call startEquipment first
 
-    actorForControls("Altimeter") ! RegitsterListener(self)
+    actorForControls("Altimeter") ! RegisterListener(self)
     actorForPilots(pilotName) ! ReadyToGo
     actorForPilots(copilotName) ! ReadyToGo
   }
@@ -61,6 +63,8 @@ class Plane extends Actor with ActorLogging {
       log info(s"Altitude is $altitude.")
     case RequestCopilot =>
       sender ! CopilotReference(actorForControls(copilotName))
+    case LostControl =>
+      actorForPilots("Autopilot") ! Controls(actorForControls("ControlSurfaces"))
   }
 
   implicit val askTimeout = Timeout(1.second)

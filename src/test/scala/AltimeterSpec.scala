@@ -69,7 +69,7 @@ class AltimeterSpec
     // real, not mock
     "calculating altitude changes" in {
       val ref = system.actorOf(Props(Altimeter()))
-      ref ! EventSource.RegitsterListener(testActor)
+      ref ! EventSource.RegisterListener(testActor)
       ref ! RateChanging(1f)
 
       // def fishForMessage(...)(f: PartialFunction[Any, Boolean]): Any

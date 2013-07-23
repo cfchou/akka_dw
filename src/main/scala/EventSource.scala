@@ -7,8 +7,8 @@ package zzz.akka.avionics
 import akka.actor.{Actor, ActorRef}
 
 object EventSource {
-  case class RegitsterListener(listener: ActorRef)
-  case class UnregitsterListener(listener: ActorRef)
+  case class RegisterListener(listener: ActorRef)
+  case class UnregisterListener(listener: ActorRef)
 }
 
 trait EventSource {  this: Actor =>
@@ -22,10 +22,10 @@ trait ProductionEventSource extends EventSource { this: Actor =>
   var listeners = Vector.empty[ActorRef]
 
   val evenSourceReceive: Actor.Receive = {
-    case RegitsterListener(listener) =>
+    case RegisterListener(listener) =>
       listeners = if (listeners.contains(listener)) listeners
       else listeners :+ listener
-    case UnregitsterListener(listener) =>
+    case UnregisterListener(listener) =>
       listeners = listeners.filter(_ != listener)
   }
 

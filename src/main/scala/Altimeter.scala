@@ -10,7 +10,7 @@ import scala.concurrent.duration._
 
 
 object Altimeter {
-  case class RateChanging(amount: Float)
+  case class RateChange(amount: Float)
   case class AltitudeUpdate(altitude: Double)
   def apply() = new Altimeter with ProductionEventSource
 }
@@ -41,7 +41,7 @@ class Altimeter extends Actor with ActorLogging {
   case object Tick
 
   def receive: Actor.Receive = evenSourceReceive orElse {
-    case RateChanging(amount) =>
+    case RateChange(amount) =>
       // [-1,1]
       rateOfClimb = amount.min(1.0f).max(-1.0f) * maxRateOfClimb
       log info(s"Altimeter rateOfClimb to $rateOfClimb.")
