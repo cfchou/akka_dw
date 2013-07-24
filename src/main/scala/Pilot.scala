@@ -10,6 +10,47 @@ import akka.actor.{Terminated, ActorRef, Actor}
 object Pilots {
   case object ReadyToGo
   case object RelinquishControl
+
+  import FlyingBehaviour._
+  import ControlSurfaces._
+
+
+  val tipsyCalcElevator: Calculator = { (target, status) =>
+    val msg = calcElevator(target, status)
+    // making the msg biased since he's tipsy
+    msg match {
+      case StickForward(amt) => StickForward(amt * 1.03f)
+      case StickBack(amt) => StickBack(amt * 1.03f)
+      case m => m  // is it necessary?
+    }
+  }
+
+  val tipsyCalcAilerons: Calculator = { (target, status) =>
+    val msg = calcAilerons(target, status)
+    msg match {
+      case StickLeft(amt) => StickLeft(amt * 1.03f)
+      case StickRight(amt) => StickRight(amt * 1.03f)
+      case m => m  // is it necessary?
+    }
+  }
+
+  val zaphodCalcElevator: Calculator = { (target, status) =>
+    val msg = calcElevator(target, status)
+    msg match {
+      case StickForward(amt) => StickBack(1f)
+      case StickBack(amt) => StickForward(1f)
+      case m => m  // is it necessary?
+    }
+  }
+
+  val zaphodCalcAilerons: Calculator = { (target, status) =>
+    val msg = calcAilerons(target, status)
+    msg match {
+      case StickLeft(amt) => StickRight(1f)
+      case StickRight(amt) => StickLeft(1f)
+      case m => m  // is it necessary?
+    }
+  }
 }
 
 trait PilotProvider {
@@ -30,6 +71,8 @@ class Pilot(plane: ActorRef, autopilot: ActorRef,
             var controls: ActorRef, // mutable, might give away controls
             altimeter: ActorRef)
   extends Actor {
+  this: DrinkingProvider with FlyingProvider =>
+
   import Pilots._
   import Plane._
 
