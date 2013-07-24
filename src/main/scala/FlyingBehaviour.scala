@@ -100,6 +100,10 @@ class FlyingBehaviour(plane: ActorRef, heading: ActorRef, altimeter: ActorRef)
         // as the result we get:
         //   PF[State, State](PF[Event, State](e)): PF[Event, State]
     }
+
+    def whenUnhandled(stateFunction: StateFunction): Unit
+
+    def initialize(): Unit
   }
   */
 
@@ -117,9 +121,12 @@ class FlyingBehaviour(plane: ActorRef, heading: ActorRef, altimeter: ActorRef)
       plane ! GiveMeControl
       heading ! RegisterListener(self)
       altimeter ! RegisterListener(self)
+      setTimer("PreparingTooLong", Adjust, 200.millis, repeat = false)
   }
 
-  when(PreparingToFly, stateTimeout = 5.seconds)(transform {
+  // Don't use stateTimeout
+  // when(PreparingToFly, stateTimeout = 5.seconds)
+  when(PreparingToFly)(transform {
     // stay PreparingToFly
     case Event(HeadingUpdate(head), d: FlightData) =>
       stay using d.copy(status = d.status.copy(heading = head,
@@ -132,8 +139,14 @@ class FlyingBehaviour(plane: ActorRef, heading: ActorRef, altimeter: ActorRef)
     case Event(Controls(ctrls), d: FlightData) =>
       stay using d.copy(controls = ctrls)
 
-    // goto Idle, since stateTimeout in `when` is expired
+    /*
+    Don't use StateTimeout, since msgs keep comming in if either heading or
+    altimeter was successfully subscribed. StateTimeout will never trip.
     case Event(StateTimeout, _) =>
+     */
+
+    // goto Idle
+    case Event(Adjust, _) =>
       plane ! LostControl
       goto(Idle)
   } using {
@@ -142,6 +155,59 @@ class FlyingBehaviour(plane: ActorRef, heading: ActorRef, altimeter: ActorRef)
       s.copy(stateName = Flying)
   })
 
+  onTransition {
+    case _ -> Idle =>
+      cancelTimer("PreparingTooLong")
+      heading ! UnregisterListener(self)
+      altimeter ! UnregisterListener(self)
+  }
+
+  onTransition {
+    case PreparingToFly -> Flying =>
+      setTimer("Adjustment", Adjust, 200.millis, repeat = true)
+  }
+
+  def preComplete(data: Data): Boolean = {
+    data match {
+      case FlightData(c, _, _, _, s) =>
+        if (!c.isTerminated && s.heading != -1f && s.altitude != -1f) true
+        else false
+      case _ => false
+    }
+  }
+
+  when(Flying) {
+    case Event(HeadingUpdate(head), d: FlightData) =>
+      stay using d.copy(status = d.status.copy(heading = head,
+        headingSinceMS = currentMS))
+
+    case Event(AltitudeUpdate(alt), d: FlightData) =>
+      stay using d.copy(status = d.status.copy(altitude = alt,
+        altitudeSinceMS = currentMS))
+
+    case Event(Adjust, d: FlightData) =>
+      stay using adjust(d)
+  }
+
+  onTransition {
+    case Flying -> _ =>
+      cancelTimer("Adjustment")
+  }
+
+  def adjust(d: FlightData): FlightData = {
+    val FlightData(c, elevCalc, bankCalc, t, s) = d
+    c ! elevCalc(t, s)
+    c ! bankCalc(t, s)
+    d
+  }
+
+  // msgs may come in at any state
+  whenUnhandled {
+    case Event(RelinquishControl, _) =>
+      goto(Idle)
+  }
+
+  initialize()
 }
 
 

@@ -14,6 +14,11 @@ object HeadingIndicator {
 
   // Event published to indicate where we're headed
   case class HeadingUpdate(heading: Float)
+  def apply() = new HeadingIndicator with ProductionEventSource
+}
+
+trait HeadingIndicatorProvider {
+  def newHeadingIndicator: HeadingIndicator = HeadingIndicator()
 }
 
 trait HeadingIndicator extends Actor with ActorLogging {
@@ -26,6 +31,7 @@ trait HeadingIndicator extends Actor with ActorLogging {
 
   val maxDegPerSec = 5
 
+  implicit val ec = context.system.dispatcher
   val ticker = context.system.scheduler.schedule(100.millis, 100.millis, self,
     Tick)
 

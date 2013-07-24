@@ -24,12 +24,14 @@ object Plane {
   def apply(): Plane =
     new Plane with AltimeterProvider
       with PilotProvider
+      with HeadingIndicatorProvider
       with LeadFlightAttendantProvider
 }
 
 class Plane extends Actor with ActorLogging {
   this: AltimeterProvider
         with PilotProvider
+        with HeadingIndicatorProvider
         with LeadFlightAttendantProvider =>
 
   import Altimeter._
@@ -76,8 +78,9 @@ class Plane extends Actor with ActorLogging {
         // Create children.
         def childStarter() {
           val alt = context.actorOf(Props(newAltimeter), "Altimeter")
+          val head = context.actorOf(Props(newHeadingIndicator), "Heading")
           context.actorOf(Props(newAutopilot(self)), "Autopilot")
-          context.actorOf(Props(new ControlSurfaces(alt)), "ControlSurfaces")
+          context.actorOf(Props(new ControlSurfaces(plane, alt, head)), "ControlSurfaces")
         }
       }), "Equipment")
     Await.result(controls ? WaitForStart, 1.second)

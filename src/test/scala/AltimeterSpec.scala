@@ -7,7 +7,7 @@ package zzz.akka.avionics
 
 import akka.testkit.{TestActorRef, TestLatch, TestKit}
 import akka.actor.{Props, Actor, ActorSystem}
-import Altimeter.{AltitudeUpdate, RateChanging}
+import Altimeter.{AltitudeUpdate, RateChange}
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 import org.scalatest.matchers.ShouldMatchers
 import scala.concurrent.Await
@@ -56,13 +56,13 @@ class AltimeterSpec
   "Altimeter" should {
     "record rate of climb changes" in new Helper {
       val (_, al) = actor()
-      al.receive(RateChanging(1f))
+      al.receive(RateChange(1f))
       al.rateOfClimb should be (al.maxRateOfClimb)
     }
 
     "keep rate of climb changes within bounds" in new Helper {
       val (_, al) = actor()
-      al.receive(RateChanging(2f))
+      al.receive(RateChange(2f))
       al.rateOfClimb should be (al.maxRateOfClimb)
     }
 
@@ -70,7 +70,7 @@ class AltimeterSpec
     "calculating altitude changes" in {
       val ref = system.actorOf(Props(Altimeter()))
       ref ! EventSource.RegisterListener(testActor)
-      ref ! RateChanging(1f)
+      ref ! RateChange(1f)
 
       // def fishForMessage(...)(f: PartialFunction[Any, Boolean]): Any
       // wait for messages, won't come back unless timeout or the partial
