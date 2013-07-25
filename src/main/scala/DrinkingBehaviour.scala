@@ -38,7 +38,7 @@ class DrinkingBehaviour(drinker: ActorRef) extends Actor {
 
   var currentLevel = 0f
 
-  val ec = context.system.dispatcher
+  implicit val ec = context.system.dispatcher
 
   // as times goes, you'll feel more soberer
   val sobering = context.system.scheduler.schedule(initialSobering,

@@ -206,6 +206,7 @@ class FlyingBehaviour(plane: ActorRef, heading: ActorRef, altimeter: ActorRef)
       cancelTimer("Adjustment")
   }
 
+  // calculate elevator and bank by calculators at hand
   def adjust(d: FlightData): FlightData = {
     val FlightData(c, elevCalc, bankCalc, t, s) = d
     c ! elevCalc(t, s)

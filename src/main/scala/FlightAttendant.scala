@@ -64,7 +64,7 @@ class FlightAttendant extends Actor {
 
     // ScheduleDelivery signals us to deliver drink now
     case DeliverDrink(drinkname) =>
-      person ! drinkname
+      person ! Drink(drinkname)
       pendingDelivery = None
       context.become(assistInjuredPassenger orElse handleDrinkRequests)
 
