@@ -16,7 +16,7 @@ object Altimeter {
 }
 
 trait AltimeterProvider {
-  def newAltimeter: Altimeter = Altimeter()
+  def newAltimeter: Actor = Altimeter()
 }
 
 class Altimeter extends Actor with ActorLogging {

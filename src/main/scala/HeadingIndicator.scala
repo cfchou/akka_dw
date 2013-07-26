@@ -18,7 +18,7 @@ object HeadingIndicator {
 }
 
 trait HeadingIndicatorProvider {
-  def newHeadingIndicator: HeadingIndicator = HeadingIndicator()
+  def newHeadingIndicator: Actor = HeadingIndicator()
 }
 
 trait HeadingIndicator extends Actor with ActorLogging {

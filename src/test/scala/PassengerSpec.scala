@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 import scala.concurrent.duration.FiniteDuration
 import akka.actor.{Props, ActorRef, ActorSystem}
 import akka.testkit.{ImplicitSender, TestKit}
-import scala
+
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.WordSpec
 import zzz.akka.avionics.Passenger._

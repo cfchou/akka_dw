@@ -31,7 +31,7 @@ trait DrinkRequestProbability {
 }
 
 trait PassengerProvider {
-  def newPassenger(callButton: ActorRef): Passenger =
+  def newPassenger(callButton: ActorRef): Actor =
     new Passenger(callButton) with DrinkRequestProbability
 }
 
@@ -52,6 +52,7 @@ class Passenger(callButton: ActorRef) extends Actor with ActorLogging {
   val drinks = context.system.settings.config.getStringList(
     "zzz.akka.avionics.drinks").asScala.toIndexedSeq
 
+  implicit val ec = context.system.dispatcher
   val scheduler = context.system.scheduler
 
   override def preStart() {
