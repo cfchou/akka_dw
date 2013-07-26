@@ -42,6 +42,7 @@ class Passenger(callButton: ActorRef) extends Actor with ActorLogging {
   import FlightAttendant.{GetDrink, Drink}
   import collection.JavaConverters._
 
+  val r = scala.util.Random
   case object CallForDrink
 
   // Path(Uri)es have spaces replaced by '_'s. Convert them back.
@@ -51,13 +52,30 @@ class Passenger(callButton: ActorRef) extends Actor with ActorLogging {
   val drinks = context.system.settings.config.getStringList(
     "zzz.akka.avionics.drinks").asScala.toIndexedSeq
 
-  val schduler = context.system.scheduler
+  val scheduler = context.system.scheduler
 
   override def preStart() {
     self ! CallForDrink
   }
 
-  def mabySendDrinkRequest(): Unit = {
+  // decide whether or not I want a drink
+  def maybeSendDrinkRequest(): Unit = {
+    if (r.nextFloat() > askThreshold) {
+      val drinkname = drinks(r.nextInt(drinks.length))
+      callButton ! GetDrink(drinkname)
+    }
+    // next time I will decide again
+    scheduler.scheduleOnce(randomishTime(), self, CallForDrink)
+  }
 
+  def receive: Actor.Receive = {
+    case CallForDrink =>
+      maybeSendDrinkRequest()
+    case Drink(drinkname) =>
+      log info s"$myname received a $drinkname - Yum"
+    case FastenSeatBelts =>
+      log info s"$myname fastening seatbelt"
+    case UnfastenSeatBelts =>
+      log info s"$myname unfastening seatbelt"
   }
 }

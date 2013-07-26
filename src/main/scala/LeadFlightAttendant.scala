@@ -16,7 +16,7 @@ object LeadFlightAttendant {
 }
 
 trait LeadFlightAttendantProvider {
-  def newLeadFlightAttendant: Actor = LeadFlightAttendant()
+  def newLeadFlightAttendant: LeadFlightAttendant = LeadFlightAttendant()
 }
 
 class LeadFlightAttendant extends Actor {
