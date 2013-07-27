@@ -80,15 +80,10 @@ class PassengerSupervisor(callButton: ActorRef) extends Actor with ActorLogging 
 
     case Children(passengers, destinedFor) =>
       log.info(s"noRouter receive ${passengers.toString} and ${destinedFor.path.name}")
-      val t = BroadcastRouter(passengers)
-      //val t0 = Props()
-      val t0 = Props.empty
-      val t1 = t0.withRouter(t)
-      val router = context.actorOf(t1, "Passengers")
-      /*
+
       val router = context.actorOf(
-        Props().withRouter(BroadcastRouter(passengers)), "Passengers")
-      */
+        Props.empty.withRouter(BroadcastRouter(passengers)), "Passengers")
+
       destinedFor ! PassengerBroadcaster(router)
       context.become(yesRouter(router))
   }
