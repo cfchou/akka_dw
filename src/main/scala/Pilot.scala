@@ -162,9 +162,8 @@ class Pilot(plane: ActorRef, autopilot: ActorRef,
   override def unhandled(message: Any) {
     message match {
       // case class Transition[S](fsmRef: ActorRef, from: S, to: S)
-      case Transition(_, _, Flying) =>
-        setCourse(sender)
       case Transition(_, _, Idle) =>
+        setCourse(sender)
         context.become(idle)
       // intercept the following two, preventing them from entering the log
       case Transition(_, _, _) =>
