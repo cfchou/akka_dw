@@ -118,12 +118,14 @@ class Plane extends Actor with ActorLogging {
     PassengerSupervisor's BroadcastRouter which accepts many routees
     which will be broadcast by BroadcastRouter.
 
-    But here we will have a pool of lead attendants by config. One is randomly
-    chosen(RandomRouter) to randomly choose(our code) an attendant.
+    But here we will have a pool of attendants by config and
+    instead of LeadFlightAttendant, we creates a pool of FlightAttendants which
+    get chosen(RandomRouter) randomly. 'leadAttendant' is not a single Actor
+    but a pool of them. But that's opaque to msg senders.
      */
     val leadAttendant = context.actorOf(
       Props(newFlightAttendant).withRouter(FromConfig())
-      , "FlightAttendantRouter")
+      , "FlightAttendantRouter") // match config
 
     val people = context.actorOf(
       Props(new IsolatedStopSupervisor with OneForOneStrategyFactory {
