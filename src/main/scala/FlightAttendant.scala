@@ -21,6 +21,13 @@ object FlightAttendant {
   }
 }
 
+trait FlightAttendantProvider {
+  def newFlightAttendant(): Actor  =
+    new FlightAttendant with AttendantResponsiveness {
+      val maxResponseTimeMS: Int = 300000
+    }
+}
+
 
 class FlightAttendant extends Actor {
   this: AttendantResponsiveness =>
