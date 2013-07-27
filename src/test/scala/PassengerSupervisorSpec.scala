@@ -6,10 +6,11 @@
 package zzz.akka.avionics
 
 import com.typesafe.config.ConfigFactory
-import akka.actor.{Props, ActorSystem, Actor, ActorRef}
-import akka.testkit.{ImplicitSender, TestKit}
+import akka.actor._
+import akka.testkit.{TestProbe, ImplicitSender, TestKit}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfter, WordSpec}
 import org.scalatest.matchers.ShouldMatchers
+import zzz.akka.avionics.PassengerSupervisor.PassengerBroadcaster
 import zzz.akka.avionics.PassengerSupervisor.{PassengerBroadcaster, GetPassengerBroadcaster}
 import scala.concurrent.duration._
 
@@ -28,9 +29,11 @@ object PassengerSupervisorSpec {
 
 trait TestPassengerProvider extends PassengerProvider {
   override def newPassenger(callButton: ActorRef): Actor =
-    new Actor {
+    new Actor with ActorLogging {
       def receive: Actor.Receive = {
-        case m => callButton ! m
+        case m =>
+          log.info(s"${self.path.name} received ${m.toString} from ${sender.path.name}, send to ${callButton.path.name}")
+          callButton ! m
       }
     }
 }
@@ -50,22 +53,24 @@ class PassengerSupervisorSpec
 
   "PassengerSupervisor" should {
     "work" in {
+      val p = TestProbe()
       val a = system.actorOf(
-        Props(new PassengerSupervisor(testActor) with TestPassengerProvider))
+        Props(new PassengerSupervisor(p.ref) with TestPassengerProvider),
+        "testPS")
 
       a ! GetPassengerBroadcaster
       val broadcaster = expectMsgType[PassengerBroadcaster].broadcaster
       val sayhi = "hi there"
       broadcaster ! sayhi
       // 5 test passengers response "hi there" to callButton, which is our
-      // testActor
-      expectMsg(sayhi)
-      expectMsg(sayhi)
-      expectMsg(sayhi)
-      expectMsg(sayhi)
-      expectMsg(sayhi)
+      // testProbe
+      p.expectMsg(sayhi)
+      p.expectMsg(sayhi)
+      p.expectMsg(sayhi)
+      p.expectMsg(sayhi)
+      p.expectMsg(sayhi)
       // and no further responses
-      expectNoMsg(100.millis)
+      p.expectNoMsg(100.millis)
 
       a ! GetPassengerBroadcaster
       // pattern matching only success if it matches existing local val
