@@ -3,7 +3,7 @@
  * User: cfchou
  * Date: 14/07/2013
  */
-package zzz.akka.test
+package zzz.akka.investigation
 import akka.actor.{Actor, Props, ActorRef, ActorSystem}
 import akka.testkit.{ImplicitSender, TestKit}
 import org.scalatest.{ParallelTestExecution, BeforeAndAfterAll, WordSpec, fixture}
