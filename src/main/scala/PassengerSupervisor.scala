@@ -73,16 +73,39 @@ class PassengerSupervisor(callButton: ActorRef) extends Actor with ActorLogging 
     }), "StopSupervisor")
   }
 
+  /*
   def noRouter: Actor.Receive = {
     case GetPassengerBroadcaster =>
-      val passengers = context.actorFor("StopSupervisor")
-      passengers ! GetChildren(sender)
+      val supervisor = context.actorFor("StopSupervisor")
+      supervisor ! GetChildren(sender)
 
     case Children(passengers, destinedFor) =>
       log.info(s"noRouter receive ${passengers.toString} and ${destinedFor.path.name}")
 
       val router = context.actorOf(
         Props.empty.withRouter(BroadcastRouter(passengers)), "Router")
+
+      destinedFor ! PassengerBroadcaster(router)
+      context.become(yesRouter(router))
+  }
+  */
+
+  import akka.pattern.ask
+  import akka.pattern.pipe
+  def noRouter: Actor.Receive = {
+    case GetPassengerBroadcaster =>
+      val actor = context.actorFor("StopSupervisor")
+
+      (actor ? GetChildren(sender)).mapTo[Children] map {
+        resp =>
+          (Props.empty.withRouter(BroadcastRouter(resp.children))
+            , resp.childrenFor)
+      } pipeTo self
+
+    case (props: Props, destinedFor: ActorRef) =>
+      log.info(s"noRouter receive ${props.toString} and ${destinedFor.path.name}")
+
+      val router = context.actorOf(props , "Router")
 
       destinedFor ! PassengerBroadcaster(router)
       context.become(yesRouter(router))

@@ -6,6 +6,8 @@
 package zzz.akka.investigation
 
 import org.scalatest.WordSpec
+import java.util.concurrent.Executors
+import scala.concurrent.{ExecutionContext, Future, Await}
 import org.scalatest.matchers.ShouldMatchers
 import scala.concurrent.duration._
 
@@ -16,8 +18,6 @@ class MultiExecContextSpec extends WordSpec with ShouldMatchers {
     fibs.zip(fibs.tail).map { n => n._1 + n._2 }
 
   "Future" should {
-    import java.util.concurrent.Executors
-    import scala.concurrent.{ExecutionContext, Future, Await}
 
     "calculate fibonacci numbers" in {
       // create EC from plain java execution service
