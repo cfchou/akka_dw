@@ -35,8 +35,8 @@ class PassengerSupervisor(callButton: ActorRef) extends Actor with ActorLogging 
   }
 
   // internal msgs
-  case class GetChildren(forSomeone: ActorRef)
-  case class Children(children: immutable.Iterable[ActorRef], childrenFor: ActorRef)
+  case class GetChildren
+  case class Children(children: immutable.Iterable[ActorRef])
 
   override def preStart() {
     // an intermediate supervisor
@@ -66,9 +66,9 @@ class PassengerSupervisor(callButton: ActorRef) extends Actor with ActorLogging 
       }
 
       def receive: Actor.Receive = {
-        case GetChildren(forSomeone) =>
+        case GetChildren =>
           log.info(s"${self.path.name} received GetChildren from ${sender.path.name}")
-          sender ! Children(context.children, forSomeone)
+          sender ! Children(context.children)
       }
     }), "StopSupervisor")
   }
@@ -94,20 +94,22 @@ class PassengerSupervisor(callButton: ActorRef) extends Actor with ActorLogging 
   import akka.pattern.pipe
   def noRouter: Actor.Receive = {
     case GetPassengerBroadcaster =>
-      val actor = context.actorFor("StopSupervisor")
+      val supervisor = context.actorFor("StopSupervisor")
+      val destinedFor = sender // frozen closure
 
-      (actor ? GetChildren(sender)).mapTo[Children] map {
+      (supervisor ? GetChildren).mapTo[Children] map {
         resp =>
           (Props.empty.withRouter(BroadcastRouter(resp.children))
-            , resp.childrenFor)
-      } pipeTo self
+            , destinedFor)
+      } pipeTo self // In the case of duplicate GetPassengerBroadcaster, by the
+                    // time it pipes, we might be in yesRouter state.
 
-    case (props: Props, destinedFor: ActorRef) =>
-      log.info(s"noRouter receive ${props.toString} and ${destinedFor.path.name}")
+    case (props: Props, forSomeone: ActorRef) =>
+      log.info(s"noRouter receive ${props.toString} and ${forSomeone.path.name}")
 
       val router = context.actorOf(props , "Router")
 
-      destinedFor ! PassengerBroadcaster(router)
+      forSomeone ! PassengerBroadcaster(router)
       context.become(yesRouter(router))
   }
 
@@ -118,8 +120,8 @@ class PassengerSupervisor(callButton: ActorRef) extends Actor with ActorLogging 
     // Might be many GetPassengerBroadcaster in noRouter state.
     // First Children response flips the state, and still subsequent Children
     // responses need to be handled.
-    case Children(_, destinedFor) =>
-      destinedFor ! PassengerBroadcaster(router)
+    case (_, forSomeone: ActorRef) =>
+      forSomeone ! PassengerBroadcaster(router)
   }
 
   def receive = noRouter

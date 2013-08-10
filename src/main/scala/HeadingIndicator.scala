@@ -21,10 +21,16 @@ trait HeadingIndicatorProvider {
   def newHeadingIndicator: Actor = HeadingIndicator()
 }
 
-trait HeadingIndicator extends Actor with ActorLogging {
+trait HeadingIndicator
+  extends Actor
+  with ActorLogging
+  with StatusReporter {
   this: EventSource =>
 
   import HeadingIndicator._
+  import StatusReporter._
+
+  def currentStatus: Status = StatusOK
 
   // internal msg to recalculate the heading
   case object Tick
@@ -55,7 +61,9 @@ trait HeadingIndicator extends Actor with ActorLogging {
       sendEvent(HeadingUpdate(heading))
   }
 
-  def receive = evenSourceReceive orElse headingIndicatorReceive
+  def receive = statusReceive orElse
+    evenSourceReceive orElse
+    headingIndicatorReceive
 
   override def postStop() = ticker.cancel()
 }
