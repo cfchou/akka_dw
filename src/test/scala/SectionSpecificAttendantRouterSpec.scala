@@ -7,7 +7,6 @@ package zzz.akka.avionics
 
 import akka.actor.{Props, ActorSystem, Actor}
 import akka.testkit.{ExtractRoute, ImplicitSender, TestKit}
-import zzz.akka.test.ActorSys
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 import org.scalatest.matchers.ShouldMatchers
 import akka.routing.{Destination, RouterConfig, Route}

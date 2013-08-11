@@ -11,6 +11,7 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import akka.pattern.ask
+import akka.pattern.pipe
 import akka.routing.FromConfig
 
 object Plane {
@@ -37,6 +38,7 @@ class Plane extends Actor with ActorLogging {
         with LeadFlightAttendantProvider
         with FlightAttendantProvider =>
 
+  import HeadingIndicator._
   import Altimeter._
   import Plane._
 
@@ -71,6 +73,17 @@ class Plane extends Actor with ActorLogging {
     case LostControl =>
       actorForPilots("Autopilot") ! Controls(actorForControls(
         "ControlSurfaces"))
+
+    case GetCurrentHeading =>
+      //(actorForControls("Heading") ? GetCurrentHeading) pipeTo sender
+
+      // def forward(message: Any)(implicit context: ActorContext)
+      // = tell(message, context.sender)
+      actorForControls("Heading") forward GetCurrentHeading
+    case GetCurrentAltitude =>
+      //(actorForControls("Altimeter") ? GetCurrentAltitude) pipeTo sender
+      actorForControls("Altimeter") forward GetCurrentAltitude
+
   }
 
   implicit val askTimeout = Timeout(1.second)

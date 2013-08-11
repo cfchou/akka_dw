@@ -12,6 +12,10 @@ import scala.concurrent.duration._
 object Altimeter {
   case class RateChange(amount: Float)
   case class AltitudeUpdate(altitude: Double)
+
+  case class CurrentAltitude(altitude: Double)
+  case object GetCurrentAltitude
+
   def apply() = new Altimeter with ProductionEventSource
 }
 
@@ -50,6 +54,9 @@ class Altimeter extends Actor with ActorLogging {
       altitude = altitude + ((tick - lastTick) / 60000.0) * rateOfClimb
       lastTick = tick
       sendEvent(AltitudeUpdate(altitude))
+
+    case GetCurrentAltitude =>
+      sender ! CurrentAltitude(altitude)
   }
 
   override def postStop() {

@@ -20,6 +20,8 @@ object Avionics {
   //val plane = system.actorOf(Props[Plane], "Plane")
   val plane = system.actorOf(Props(Plane()), "Plane")
 
+  val server = system.actorOf(Props(new TelnetServer(plane)), "Telnet")
+
   import ExecutionContext.Implicits.global
   def main(args: Array[String]) {
     /*

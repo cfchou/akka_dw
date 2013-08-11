@@ -12,6 +12,9 @@ object HeadingIndicator {
   // How fast we're changing direction
   case class BankChange(amount: Float)
 
+  case class CurrentHeading(amount: Float)
+  case object GetCurrentHeading
+
   // Event published to indicate where we're headed
   case class HeadingUpdate(heading: Float)
   def apply() = new HeadingIndicator with ProductionEventSource
@@ -59,6 +62,9 @@ trait HeadingIndicator
       heading = (heading + (360 + (timeDelta * degs))) % 360
       lastTick = tick
       sendEvent(HeadingUpdate(heading))
+
+    case GetCurrentHeading =>
+      sender ! CurrentHeading(heading)
   }
 
   def receive = statusReceive orElse

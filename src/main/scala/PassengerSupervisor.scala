@@ -10,6 +10,8 @@ import akka.actor.OneForOneStrategy
 import akka.actor.SupervisorStrategy.{Stop, Resume, Escalate}
 import akka.routing.BroadcastRouter
 import scala.collection.immutable
+import akka.util.Timeout
+import scala.concurrent.duration._
 
 object PassengerSupervisor {
   // Allow someone to request the BroadcastRouter
@@ -35,7 +37,7 @@ class PassengerSupervisor(callButton: ActorRef) extends Actor with ActorLogging 
   }
 
   // internal msgs
-  case class GetChildren
+  case object GetChildren
   case class Children(children: immutable.Iterable[ActorRef])
 
   override def preStart() {
@@ -92,6 +94,10 @@ class PassengerSupervisor(callButton: ActorRef) extends Actor with ActorLogging 
 
   import akka.pattern.ask
   import akka.pattern.pipe
+
+  implicit val ec = context.dispatcher
+  implicit val askTimeout = Timeout(1.second)
+
   def noRouter: Actor.Receive = {
     case GetPassengerBroadcaster =>
       val supervisor = context.actorFor("StopSupervisor")
